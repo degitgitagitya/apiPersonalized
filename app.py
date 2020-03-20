@@ -192,7 +192,7 @@ def get_kelases():
 
     return jsonify(result)
 
-# Get All Kelas
+# Get All Kelas by_id_guru
 @app.route('/kelases/<id_guru>', methods=['GET'])
 def get_kelases_by_guru(id_guru):
     all_kelas = Kelas.query.filter_by(id_guru=id_guru)
@@ -240,17 +240,19 @@ class Siswa(db.Model):
     nama = db.Column(db.String(100))
     email = db.Column(db.String(100))
     id_gaya_belajar = db.Column(db.Integer)
+    password = db.Column(db.String(100))
 
-    def __init__(self, id_kelas, nama, email, id_gaya_belajar):
+    def __init__(self, id_kelas, nama, email, id_gaya_belajar, password):
         self.id_kelas = id_kelas
         self.nama = nama
         self.email = email
         self.id_gaya_belajar = id_gaya_belajar
+        self.password = password
 
 # Siswa Schema
 class SiswaSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'id_kelas', 'nama', 'email', 'id_gaya_belajar')
+        fields = ('id', 'id_kelas', 'nama', 'email', 'id_gaya_belajar', 'password')
 
 # Init Siswa Schema
 siswa_schema = SiswaSchema()
@@ -264,6 +266,14 @@ def get_siswas():
 
     return jsonify(result)
 
+# Get All Siswa by id_kelas
+@app.route('/siswas/<id_kelas>', methods=['GET'])
+def get_siswa_by_kelas(id_kelas):
+    all_siswa = Siswa.query.filter_by(id_kelas=id_kelas)
+    result = siswas_schema.dump(all_siswa)
+
+    return jsonify(result)
+
 # Create a Siswa
 @app.route('/siswa', methods=['POST'])
 def add_siswa():
@@ -271,8 +281,9 @@ def add_siswa():
     nama = request.json['nama']
     email = request.json['email']
     id_gaya_belajar = request.json['id_gaya_belajar']
+    password = request.json['password']
 
-    new_siswa = Siswa(id_kelas, nama, email, id_gaya_belajar)
+    new_siswa = Siswa(id_kelas, nama, email, id_gaya_belajar, password)
     db.session.add(new_siswa)
     db.session.commit()
 
@@ -296,10 +307,170 @@ def update_siswa(id):
     siswa.nama = request.json['nama']
     siswa.email = request.json['email']
     siswa.id_gaya_belajar = request.json['id_gaya_belajar']
+    siswa.password = request.json['password']
 
     db.session.commit()
 
     return siswa_schema.jsonify(siswa)
+
+
+# Materi Model
+class Materi(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    judul = db.Column(db.String(100))
+    keterangan = db.Column(db.String(100))
+    indikator = db.Column(db.String(100))
+    tujuan_belajar = db.Column(db.String(100))
+
+    def __init__(self, judul, keterangan, indikator, tujuan_belajar):
+        self.judul = judul
+        self.keterangan = keterangan
+        self.indikator = indikator
+        self.tujuan_belajar = tujuan_belajar
+
+# Materi Schema
+class MateriSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'judul', 'keterangan', 'indikator', 'tujuan_belajar')
+
+# Init Materi Schema
+materi_schema = MateriSchema()
+materis_schema = MateriSchema(many=True)
+
+# Get All Materi
+@app.route('/materi', methods=['GET'])
+def get_all_materi():
+    all_materi = Materi.query.all()
+    result = materis_schema.dump(all_materi)
+
+    return jsonify(result)
+
+# Create a Materi
+@app.route('/materi', methods=['POST'])
+def add_materi():
+    judul = request.json['judul']
+    keterangan = request.json['keterangan']
+    indikator = request.json['indikator']
+    tujuan_belajar = request.json['tujuan_belajar']
+
+    new_materi = Materi(judul, keterangan, indikator, tujuan_belajar)
+    db.session.add(new_materi)
+    db.session.commit()
+
+    return materi_schema.jsonify(new_materi)
+
+# Delete a Materi
+@app.route('/materi/<id>', methods=['DELETE'])
+def delete_materi(id):
+    materi = Materi.query.get(id)
+    db.session.delete(materi)
+    db.session.commit()
+
+    return materi_schema.jsonify(materi)
+
+# Edit Materi
+@app.route('/materi/<id>', methods=['PUT'])
+def update_materi(id):
+    materi = Materi.query.get(id)
+
+    materi.judul = request.json['judul']
+    materi.keterangan = request.json['keterangan']
+    materi.indikator = request.json['indikator']
+    materi.tujuan_belajar = request.json['tujuan_belajar']
+
+    db.session.commit()
+
+    return materi_schema.jsonify(materi)
+
+
+# Sub Materi Model
+class SubMateri(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_gaya_belajar = db.Column(db.Integer)
+    id_materi = db.Column(db.Integer)
+    nama = db.Column(db.String(100))
+    keterangan = db.Column(db.String(100))
+    url = db.Column(db.String(100))
+
+    def __init__(self, id_gaya_belajar, id_materi, nama, keterangan, url):
+        self.id_gaya_belajar = id_gaya_belajar
+        self.id_materi = id_materi
+        self.nama = nama
+        self.keterangan = keterangan
+        self.url = url
+
+
+# Sub Materi Schema
+class SubMateriSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'id_gaya_belajar', 'id_materi', 'nama', 'keterangan', 'url')
+
+sub_materi_schema = SubMateriSchema()
+sub_materies_schema = SubMateriSchema(many=True)
+
+# Get All Sub Materi
+@app.route('/submateri', methods=['GET'])
+def get_all_sub_materi():
+    all_sub_materi = SubMateri.query.all()
+    result = sub_materies_schema.dump(all_sub_materi)
+
+    return jsonify(result)
+
+# Get All Sub Materi by id_materi
+@app.route('/submateri/<id_materi>', methods=['GET'])
+def get_sub_materi_id_materi(id_materi):
+    all_sub_materi = SubMateri.query.filter_by(id_materi=id_materi)
+    result = sub_materies_schema.dump(all_sub_materi)
+
+    return jsonify(result)
+
+# Get All Sub Materi by id_materi & id_gaya_belajar
+@app.route('/submateri/<id_materi>/<id_gaya_belajar>', methods=['GET'])
+def get_sub_materi_id_materi_gaya(id_materi, id_gaya_belajar):
+    all_sub_materi = SubMateri.query.filter_by(id_materi=id_materi, id_gaya_belajar=id_gaya_belajar)
+    result = sub_materies_schema.dump(all_sub_materi)
+
+    return jsonify(result)
+
+# Create a Sub Materi
+@app.route('/submateri', methods=['POST'])
+def add_sub_materi():
+    id_gaya_belajar = request.json['id_gaya_belajar'] 
+    id_materi = request.json['id_materi'] 
+    nama = request.json['nama'] 
+    keterangan = request.json['keterangan'] 
+    url = request.json['url'] 
+
+    new_sub_materi = SubMateri(id_gaya_belajar, id_materi, nama, keterangan, url)
+    db.session.add(new_sub_materi)
+    db.session.commit()
+
+    return sub_materi_schema.jsonify(new_sub_materi)
+
+# Delete a Materi
+@app.route('/submateri/<id>', methods=['DELETE'])
+def delete_sub_materi(id):
+    sub_materi = SubMateri.query.get(id)
+    db.session.delete(sub_materi)
+    db.session.commit()
+
+    return sub_materi_schema.jsonify(sub_materi)
+
+# Edit Materi
+@app.route('/submateri/<id>', methods=['PUT'])
+def edit_sub_materi(id):
+    sub_materi = SubMateri.query.get(id)
+
+    sub_materi.id_gaya_belajar = request.json['id_gaya_belajar']
+    sub_materi.id_materi = request.json['id_materi']
+    sub_materi.nama = request.json['nama']
+    sub_materi.keterangan = request.json['keterangan']
+    sub_materi.url = request.json['url']
+
+    db.session.commit()
+
+    return materi_schema.jsonify(sub_materi)
+
 
 
 # Run Server
