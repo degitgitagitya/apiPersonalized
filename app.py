@@ -266,6 +266,16 @@ def get_siswas():
 
     return jsonify(result)
 
+# Auth Siswa
+@app.route('/auth/siswa', methods=['POST'])
+def auth_siswa():
+    email = request.json['email']
+    password = request.json['password']
+
+    siswa = Siswa.query.filter_by(email=email, password=password).first()
+
+    return siswa_schema.jsonify(siswa)
+
 # Get All Siswa by id_kelas
 @app.route('/siswas/<id_kelas>', methods=['GET'])
 def get_siswa_by_kelas(id_kelas):
