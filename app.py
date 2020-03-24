@@ -355,6 +355,15 @@ def get_all_materi():
 
     return jsonify(result)
 
+
+# Get a Materi
+@app.route('/materi/<id>', methods=['GET'])
+def get_materi(id):
+    materi = Materi.query.get(id)
+    result = materi_schema.dump(materi)
+
+    return jsonify(result)
+
 # Create a Materi
 @app.route('/materi', methods=['POST'])
 def add_materi():
@@ -425,6 +434,13 @@ def get_all_sub_materi():
     result = sub_materies_schema.dump(all_sub_materi)
 
     return jsonify(result)
+
+# Get a Sub Materi
+@app.route('/submateri/id/<id>', methods=['GET'])
+def get_sub_materi(id):
+    sub_materi = SubMateri.query.get(id)
+
+    return sub_materi_schema.jsonify(sub_materi)
 
 # Get All Sub Materi by id_materi
 @app.route('/submateri/<id_materi>', methods=['GET'])
