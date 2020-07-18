@@ -809,6 +809,70 @@ def edit_pilihan_soal(id):
 
     return pilihan_soal_schema.jsonify(pilihan_soal)
 
+# Model Problem
+class Problem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_problem = db.Column(db.Integer)
+
+    def __init__(self, id_problem):
+        self.id_problem = id_problem
+
+# Schema Problem
+class ProblemSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'id_problem')
+
+# Init Problem
+problem_schema = ProblemSchema()
+many_problem_schema = ProblemSchema(many=True)
+
+# Get All Problem
+@app.route('/problem', methods=['GET'])
+def get_problem():
+    all_problem = Problem.query.all()
+    result = many_problem_schema.dump(all_problem)
+
+    return jsonify(result)
+
+# Get a problem
+@app.route('/problem/<id>', methods=['GET'])
+def get_a_problem(id):
+    problem = Problem.query.get(id)
+
+    return problem_schema.jsonify(problem)
+
+# Create a Problem
+@app.route('/problem', methods=['POST'])
+def add_problem():
+    id_problem = request.json['id_problem']
+
+    new_problem = Problem(id_problem)
+    db.session.add(new_problem)
+    db.session.commit()
+
+    return problem_schema.jsonify(new_problem)
+
+# Delete a Problem
+@app.route('/problem/<id>', methods=['DELETE'])
+def delete_problem(id):
+    problem = Problem.query.get(id)
+    db.session.delete(problem)
+    db.session.commit()
+
+    return problem_schema.jsonify(problem)
+
+# Edit Problem
+@app.route('/problem/<id>', methods=['PUT'])
+def update_problem(id):
+    problem = Problem.query.get(id)
+
+    problem.id_problem = request.json['id_problem']
+
+    db.session.commit()
+
+    return problem_schema.jsonify(problem)
+
+
 
 # Run Server
 if __name__ == '__main__':
