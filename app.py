@@ -2,7 +2,11 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
+import requests
 import os
+import json
+
+URL = 'http://domserver.cstash.tech:12345/api/v4/contests/3/problems'
 
 # init app
 app = Flask(__name__)
@@ -831,6 +835,21 @@ many_problem_schema = ProblemSchema(many=True)
 def get_problem():
     all_problem = Problem.query.all()
     result = many_problem_schema.dump(all_problem)
+
+    r = requests.get(URL)
+    data = json.loads(r.text)
+    for j in result:
+        for i in data:
+            if (int(i['id']) == j['id_problem']):
+                j['ordinal'] = i['ordinal']
+                j['short_name'] = i['short_name']
+                j['label'] = i['label']
+                j['time_limit'] = i['time_limit']
+                j['externalid'] = i['externalid']
+                j['name'] = i['name']
+                j['rgb'] = i['rgb']
+                j['color'] = i['color']
+
 
     return jsonify(result)
 
