@@ -892,6 +892,75 @@ def update_problem(id):
     return problem_schema.jsonify(problem)
 
 
+# Model FunctionContent
+class FunctionContent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    question = db.Column(db.String(100))
+    start = db.Column(db.Integer)
+
+# Get All Function Content
+@app.route('/function-content', methods=['GET'])
+def get_all_function_content():
+    all_function_content = FunctionContent.query.all()
+    listContent = []
+
+    if (len(all_function_content) != 0):
+        for data in all_function_content:
+            temp = {}
+            temp['id'] = data.id
+            temp['name'] = data.name
+            temp['question'] = data.question
+            temp['start'] = data.start
+            listContent.append(temp)
+
+    data = {
+        'listContent': listContent
+    }
+
+    return jsonify(data)
+
+# Get Function Content By Id
+@app.route('/function-content/<id>', methods=['GET'])
+def get_function_content(id):
+    function_content = FunctionContent.query.get(id)
+    content = {
+        'id': function_content.id,
+        'name': function_content.name,
+        'question': function_content.question,
+        'start': function_content.start,
+    }
+    return jsonify(content)
+
+class FunctionContentAnswer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_function_content = db.Column(db.Integer)
+    id_siswa = db.Column(db.Integer)
+    status = db.Column(db.Integer)
+    answer = db.Column(db.String())
+
+    def __init__(self, id_function_content, id_siswa, status, answer):
+        self.id_function_content = id_function_content
+        self.id_siswa = id_siswa
+        self.status = status
+        self.answer = answer
+
+
+# Insert Function Content Answer
+@app.route('/function-content/answer', methods=['POST'])
+def add_function_content_answer():
+    id_function_content = request.json['id_function_content']
+    id_siswa = request.json['id_siswa']
+    status = request.json['status']
+    answer = request.json['answer']
+    function_content_anwser = FunctionContentAnswer(id_function_content, id_siswa, status, answer)
+    db.session.add(function_content_anwser)
+    db.session.commit()
+    data = {
+        "message" : "success"
+    }
+    return jsonify(data)
+
 
 # Run Server
 if __name__ == '__main__':
