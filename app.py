@@ -961,6 +961,25 @@ def add_function_content_answer():
     }
     return jsonify(data)
 
+# Get Siswa Result
+@app.route('/function-content/answer/siswa/<id>', methods=['GET'])
+def get_function_content_answer_siswa(id):
+    function_content_answer = FunctionContentAnswer.query.all()
+    list_of_answer = []
+    if (len(function_content_answer) != 0):
+        for answer in function_content_answer:
+            if (answer.id_siswa == int(id) and answer.status == 1):
+                temp = {}
+                temp['id'] = answer.id
+                temp['id_function_content'] = answer.id_function_content
+                temp['id_siswa'] = answer.id_siswa
+                temp['status'] = answer.status
+                temp['answer'] = answer.answer
+                list_of_answer.append(temp)
+    data = {
+        'list_of_answer': list_of_answer
+    }
+    return jsonify(data)
 
 # Run Server
 if __name__ == '__main__':
