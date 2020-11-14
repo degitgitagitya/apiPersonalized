@@ -981,6 +981,46 @@ def get_function_content_answer_siswa(id):
     }
     return jsonify(data)
 
+#Video Model
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    description = db.Column(db.String(255))
+    url = db.Column(db.String(255))
+
+    def __init__(self, title, description, url):
+        self.title = title
+        self.description = description
+        self.url = url
+
+# Get All Videos
+@app.route('/video/', methods=['GET'])
+def get_all_video():
+    videos = Video.query.all()
+    list_of_video = []
+    if (len(videos) != 0):
+        for video in videos:
+            temp = {}
+            temp['id'] = video.id
+            temp['title'] = video.title
+            temp['description'] = video.description
+            temp['url'] = video.url
+            list_of_video.append(temp)
+    data = {
+        'list_of_video' : list_of_video
+    }
+    return jsonify(data)
+
+@app.route('/video/', methods=['POST'])
+def add_video():
+    title = request.json['title']
+    description = request.json['description']
+    url = request.json['url']
+    video = Video(title, description, url)
+    db.session.add(video)
+    db.session.commit()
+    return jsonify({"message": "success"})
+
 # Run Server
 if __name__ == '__main__':
     app.run(debug=True)
