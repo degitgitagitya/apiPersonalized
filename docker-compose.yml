@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  personalize-api:
+    container_name: personalize-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
