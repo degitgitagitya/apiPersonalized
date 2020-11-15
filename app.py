@@ -1021,6 +1021,46 @@ def add_video():
     db.session.commit()
     return jsonify({"message": "success"})
 
+
+class Slide(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    description = db.Column(db.String(255))
+    url = db.Column(db.String(255))
+
+    def __init__(self, title, description, url):
+        self.title = title
+        self.description = description
+        self.url = url
+
+# Get All Videos
+@app.route('/slide/', methods=['GET'])
+def get_all_slide():
+    slides = Slide.query.all()
+    list_of_slide = []
+    if (len(slides) != 0):
+        for slide in slides:
+            temp = {}
+            temp['id'] = slide.id
+            temp['title'] = slide.title
+            temp['description'] = slide.description
+            temp['url'] = slide.url
+            list_of_slide.append(temp)
+    data = {
+        'list_of_slide' : list_of_slide
+    }
+    return jsonify(data)
+
+@app.route('/slide/', methods=['POST'])
+def add_slide():
+    title = request.json['title']
+    description = request.json['description']
+    url = request.json['url']
+    slide = Slide(title, description, url)
+    db.session.add(slide)
+    db.session.commit()
+    return jsonify({"message": "success"})
+
 # Run Server
 if __name__ == '__main__':
     app.run(debug=True)
