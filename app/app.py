@@ -5,8 +5,10 @@ from flask_cors import CORS
 import requests
 import os
 import json
+import random
+import string
 
-URL = 'http://domserver.cstash.tech:12345/api/v4/contests/3/problems'
+URL = 'http://cstash.tech:12345/api/v4/contests/3/problems'
 
 # init app
 app = Flask(__name__)
@@ -1061,7 +1063,74 @@ def add_slide():
     db.session.commit()
     return jsonify({"message": "success"})
 
+
+class CodeAnswer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_code = db.Column(db.Integer)
+    id_siswa = db.Column(db.String(255))
+    id_submission = db.Column(db.Integer)
+
+    def __init__(self, id_code, id_siswa, id_submission):
+        self.id_code = id_code
+        self.id_siswa = id_siswa
+        self.id_submission = id_submission
+
+@app.route('/submit/answer/', methods=['POST'])
+def testing():
+    problem = request.form['problem']
+    language = request.form['language']
+    id_code = request.form['id_code']
+    id_siswa = request.form['id_siswa']
+    code = request.files['code']
+    filename = get_random_string(20)
+    code.save('./code/' + filename + '.c')
+    filesOpen = open('./code/' + filename + '.c','r')
+    testsss = "http://cstash.tech:12345/api/v4/contests/3/submissions"
+    payload = {'problem': id_code, 'language': 'c'}
+    files = [('code', filesOpen)]
+    headers = { 'Authorization': 'Basic dXNlcnBsOnBhc3N3b3Jk' }
+    response = requests.request("POST", testsss, headers=headers, data=payload, files=files)
+    filesOpen.close()
+    id_submission = int(response.text)
+    answer = CodeAnswer(id_code, id_siswa, id_submission)
+    db.session.add(answer)
+    db.session.commit()
+    return jsonify({"id" : id_submission})
+
+@app.route('/code/get/status/', methods=['POST'])
+def code_get_status():
+    id_code = request.json['id_code']
+    id_siswa = request.json['id_siswa']
+    answers = CodeAnswer.query.all()
+    data = []
+    if (len(answers) != 0):
+        for answer in answers:
+            if (answer.id_code == id_code and answer.id_siswa == id_siswa):
+                temp = {}
+                temp['id'] = answer.id
+                temp['id_code'] = answer.id_code
+                temp['id_siswa'] = answer.id_siswa
+                temp['id_submission'] = answer.id_submission
+                data.append(temp)
+
+    return jsonify(data)
+
+@app.route('/get/answer', methods=['POST'])
+def get_answer():
+    id_submission = request.json['id_submission']   
+    url = "http://cstash.tech:12345/api/v4/contests/3/judgements/?cid=3&submission_id=" + str(id_submission)
+    payload = {}
+    headers = { 'Authorization': 'Basic dXNlcnBsOnBhc3N3b3Jk' }
+    response = requests.request("GET", url, headers=headers, data=payload)
+    return jsonify(response.json())
+
+def get_random_string(length):
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.sample(letters, length))
+    return result_str
+
+
 # Run Server
 if __name__ == '__main__':
-    # app.run(debug=True)
-    app.run(host='0.0.0.0')
+    app.run(debug=True)
+    # app.run(host='0.0.0.0')
