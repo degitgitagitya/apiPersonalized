@@ -1124,6 +1124,15 @@ def get_answer():
     response = requests.request("GET", url, headers=headers, data=payload)
     return jsonify(response.json())
 
+
+@app.route('/get/all/problems', methods=['GET'])
+def get_all_problem():
+    url = "http://cstash.tech:12345/api/v4/contests/3/problems"
+    payload={}
+    headers = {}
+    response = requests.request("GET", url, headers=headers, data=payload)
+    return jsonify(response.json())
+
 def get_random_string(length):
     letters = string.ascii_lowercase
     result_str = ''.join(random.sample(letters, length))
