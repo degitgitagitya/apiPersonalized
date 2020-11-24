@@ -666,13 +666,14 @@ def update_bank_soal(id):
 class Soal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_bank_soal = db.Column(db.Integer)
+    url = db.Column(db.String(500))
     pertanyaan = db.Column(db.String(500))
     pilihan = db.relationship('PilihanSoal', backref='soal', lazy=True)
 
 
 class SoalSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'id_bank_soal', 'pertanyaan')
+        fields = ('id', 'id_bank_soal', 'url', 'pertanyaan')
 
 
 soal_schema = SoalSchema()
@@ -689,7 +690,7 @@ class PilihanSoalSchema(ma.Schema):
 class SoalSchemaCustom(ma.Schema):
     class Meta:
         model = Soal
-        fields = ('id', 'id_bank_soal', 'pertanyaan', 'pilihan')
+        fields = ('id', 'id_bank_soal', 'url', 'pertanyaan', 'pilihan')
     pilihan = ma.Nested(PilihanSoalSchema(many=True))
 
 
@@ -718,8 +719,9 @@ def get_soal_by_bank(id_bank_soal):
 def add_soal():
     id_bank_soal = request.json['id_bank_soal']
     pertanyaan = request.json['pertanyaan']
+    url = request.json['url']
 
-    new_soal = Soal(id_bank_soal=id_bank_soal, pertanyaan=pertanyaan)
+    new_soal = Soal(id_bank_soal=id_bank_soal, pertanyaan=pertanyaan, url=url)
     db.session.add(new_soal)
     db.session.commit()
 
@@ -741,6 +743,7 @@ def update_soal(id):
 
     soal.id_bank_soal = request.json['id_bank_soal']
     soal.pertanyaan = request.json['pertanyaan']
+    soal.url = request.json['url']
 
     db.session.commit()
 
@@ -1141,5 +1144,5 @@ def get_random_string(length):
 
 # Run Server
 if __name__ == '__main__':
-    app.run(debug=True)
-    # app.run(host='0.0.0.0')
+    # app.run(debug=True)
+    app.run(host='0.0.0.0')
