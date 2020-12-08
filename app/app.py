@@ -1213,7 +1213,10 @@ many_jawaban_schema = JawabanSchema(many=True)
 def get_jawaban_siswa(id_siswa, id_ujian):
     all_jawaban = AnswerEvaluation.query.filter_by(id_siswa=id_siswa, id_ujian=id_ujian)
 
-    result = many_jawaban_schema.dump(all_jawaban[-5:])
+    if (len(all_jawaban) > 5):
+        all_jawaban = all_jawaban[-5:]
+
+    result = many_jawaban_schema.dump(all_jawaban)
 
     return jsonify(result)
 
