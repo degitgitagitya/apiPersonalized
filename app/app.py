@@ -1142,6 +1142,62 @@ def get_random_string(length):
     return result_str
 
 
+class AnswerEvaluation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_siswa = db.Column(db.Integer)
+    id_ujian = db.Column(db.Integer)
+    id_soal = db.Column(db.Integer)
+    jawaban = db.Column(db.String(100))
+    kunci = db.Column(db.String(100))
+    status = db.Column(db.Integer)
+    pertanyaan = db.Column(db.String(200))
+
+    def __init__(self, id_siswa, id_ujian, id_soal, jawaban, kunci, status, pertanyaan):
+        self.id_siswa = id_siswa
+        self.id_ujian = id_ujian
+        self.id_soal = id_soal
+        self.jawaban = jawaban
+        self.kunci = kunci
+        self.status = status
+        self.pertanyaan = pertanyaan
+
+class JawabanSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'id_siswa', 'id_ujian', 'id_soal', 'jawaban', 'kunci', 'status', 'pertanyaan')
+
+
+# Init Jawaban Schema
+jawaban_schema = JawabanSchema()
+many_jawaban_schema = JawabanSchema(many=True)
+
+
+# Get All Jawaban Siswa
+@app.route('/jawaban/siswa/<id_siswa>/<id_ujian>', methods=['GET'])
+def get_jawaban_siswa(id_siswa, id_ujian):
+    all_jawaban = AnswerEvaluation.query.filter_by(id_siswa=id_siswa, id_ujian=id_ujian)
+
+    result = many_jawaban_schema.dump(all_jawaban[-5:])
+
+    return jsonify(result)
+
+
+# Add Jawaban
+@app.route('/jawaban', methods=['POST'])
+def add_jawaban():
+    list_jawaban = request.json['list_jawaban']
+    for jawaban in list_jawaban:
+        id_siswa = jawaban['id_siswa']
+        id_ujian = jawaban['id_ujian']
+        id_soal = jawaban['id_soal']
+        jawabans = jawaban['jawaban']
+        kunci = jawaban['kunci']
+        status = jawaban['status']
+        pertanyaan = jawaban['pertanyaan']
+        new_jawaban = AnswerEvaluation(id_siswa, id_ujian, id_soal, jawabans, kunci, status, pertanyaan)
+        db.session.add(new_jawaban)
+        db.session.commit()
+    return 'success'
+
 # Run Server
 if __name__ == '__main__':
     # app.run(debug=True)
