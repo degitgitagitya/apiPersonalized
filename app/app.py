@@ -7,6 +7,7 @@ import os
 import json
 import random
 import string
+from datetime import datetime
 
 URL = 'http://cstash.tech:12345/api/v4/contests/3/problems'
 
@@ -406,6 +407,38 @@ def update_materi(id):
     db.session.commit()
 
     return materi_schema.jsonify(materi)
+
+# Log Aktivitas Model
+class LogActivity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_gaya_belajar = db.Column(db.Integer)
+    id_siswa = db.Column(db.Integer)
+    waktu = db.Column(db.String(100))
+
+    def __init__ (self, id_gaya_belajar, id_siswa, waktu):
+        self.id_gaya_belajar = id_gaya_belajar
+        self.id_siswa = id_siswa
+        self.waktu = waktu
+
+# Log Activity Schema
+class LogActivitySchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'id_gaya_belajar', 'id_siswa', 'waktu')
+
+log_activity_schema = LogActivitySchema()
+log_aktivities_schema = LogActivitySchema(many=True)
+
+# Create log activity
+@app.route('/log_activity/<id_gaya_belajar>/<id_siswa>', methods=['GET'])
+def add_log_activity(id_gaya_belajar, id_siswa):
+    now = datetime.now()
+    waktu = now.strftime("%d/%m/%Y %H:%M:%S")
+
+    new_log_activity = LogActivity(id_gaya_belajar, id_siswa, waktu)
+    db.session.add(new_log_activity)
+    db.session.commit()
+
+    return log_activity_schema.jsonify(new_log_activity)
 
 
 # Sub Materi Model
