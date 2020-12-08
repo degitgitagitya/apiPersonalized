@@ -248,18 +248,20 @@ class Siswa(db.Model):
     email = db.Column(db.String(100))
     id_gaya_belajar = db.Column(db.Integer)
     password = db.Column(db.String(100))
+    lock = db.Column(db.Integer)
 
-    def __init__(self, id_kelas, nama, email, id_gaya_belajar, password):
+    def __init__(self, id_kelas, nama, email, id_gaya_belajar, password, lock):
         self.id_kelas = id_kelas
         self.nama = nama
         self.email = email
         self.id_gaya_belajar = id_gaya_belajar
         self.password = password
+        self.lock = lock
 
 # Siswa Schema
 class SiswaSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'id_kelas', 'nama', 'email', 'id_gaya_belajar', 'password')
+        fields = ('id', 'id_kelas', 'nama', 'email', 'id_gaya_belajar', 'password', 'lock')
 
 # Init Siswa Schema
 siswa_schema = SiswaSchema()
@@ -299,8 +301,9 @@ def add_siswa():
     email = request.json['email']
     id_gaya_belajar = request.json['id_gaya_belajar']
     password = request.json['password']
+    lock = request.json['lock']
 
-    new_siswa = Siswa(id_kelas, nama, email, id_gaya_belajar, password)
+    new_siswa = Siswa(id_kelas, nama, email, id_gaya_belajar, password, lock)
     db.session.add(new_siswa)
     db.session.commit()
 
@@ -325,6 +328,7 @@ def update_siswa(id):
     siswa.email = request.json['email']
     siswa.id_gaya_belajar = request.json['id_gaya_belajar']
     siswa.password = request.json['password']
+    siswa.lock = request.json['lock']
 
     db.session.commit()
 
