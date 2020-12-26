@@ -432,6 +432,22 @@ class LogActivitySchema(ma.Schema):
 log_activity_schema = LogActivitySchema()
 log_aktivities_schema = LogActivitySchema(many=True)
 
+# Get all log activity
+@app.route('/log_activity', methods=['GET'])
+def get_all_log_activity():
+    all_log_activity = LogActivity.query.all()
+    result = log_aktivities_schema.dump(all_log_activity)
+
+    return jsonify(result)
+
+# Get log activity by siswa
+@app.route('/log_activity/siswa/<id_siswa>', methods=['GET'])
+def get_log_activity_id_siswa(id_siswa):
+    log_activity_siswa = LogActivity.query.filter_by(id_siswa=id_siswa)
+    result = log_aktivities_schema.dump(log_activity_siswa)
+
+    return jsonify(result)
+
 # Create log activity
 @app.route('/log_activity/<id_gaya_belajar>/<id_siswa>', methods=['GET'])
 def add_log_activity(id_gaya_belajar, id_siswa):
